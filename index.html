@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Corelyn — Get your key</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #08080e;
+      --surface:  #0f0f18;
+      --border:   #1a1a2e;
+      --border-hi:#2a2a44;
+      --accent:   #7c6aff;
+      --accent2:  #a78bfa;
+      --text:     #e8e8f0;
+      --muted:    #5a5a78;
+      --success:  #6bffb8;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Sora', sans-serif; }
+
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 55% 45% at 15% 10%, rgba(124,106,255,.14) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 55% at 85% 90%, rgba(167,139,250,.09) 0%, transparent 65%);
+    }
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      width: 100%; max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.4rem;
+      box-shadow: 0 0 0 1px rgba(124,106,255,.07), 0 40px 100px rgba(0,0,0,.7), 0 0 80px rgba(124,106,255,.05);
+      animation: cardIn .45s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity:0; transform: translateY(20px) scale(.98); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    .logo-row { display: flex; align-items: center; gap: .7rem; margin-bottom: 2rem; }
+    .logo-mark { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 9px; display: grid; place-items: center; font-size: .95rem; box-shadow: 0 0 18px rgba(124,106,255,.35); }
+    .logo-name { font-size: 1.1rem; font-weight: 600; letter-spacing: -.02em; }
+
+    /* Step views */
+    .view { display: none; flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
+    .view.visible { display: flex; }
+
+    .get-btn, .continue-btn, .retry-btn { width: 100%; padding: .9rem; border: none; border-radius: 11px; font-family: 'Sora', sans-serif; font-weight: 600; cursor: pointer; }
+    .get-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+    .continue-btn { background: linear-gradient(135deg, var(--accent), #8b6fff); color: #fff; }
+    .retry-btn { background: transparent; border: 1px solid var(--border-hi); color: var(--text); }
+
+    .spinner { width: 40px; height: 40px; border: 2px solid rgba(124,106,255,.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .key-box { background: rgba(255,255,255,.04); border: 1px solid var(--border-hi); border-radius: 10px; padding: .85rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+    .key-value { font-family: 'JetBrains Mono', monospace; color: var(--success); word-break: break-all; flex: 1; user-select: all; }
+    .copy-btn { flex-shrink: 0; background: rgba(124,106,255,.15); border: 1px solid rgba(124,106,255,.25); border-radius: 7px; color: var(--accent2); font-size: .75rem; font-weight: 500; padding: .35rem .7rem; cursor: pointer; }
+
+    input { width: 100%; padding: .7rem 1rem; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: .9rem; }
+
+    .warn-box { display: flex; gap: .65rem; align-items: flex-start; background: rgba(255,200,80,.06); border: 1px solid rgba(255,200,80,.18); border-radius: 9px; padding: .75rem .9rem; font-size: .78rem; color: #c8a84e; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="bg-grid"></div>
+
+  <div class="page">
+    <div class="card">
+
+      <div class="logo-row">
+        <div class="logo-mark">
+          <img src="./resc/logo.png" width="30px" height="30px">
+        </div>
+        <span class="logo-name">Corelyn Cloud</span>
+      </div>
+
+      <!-- Step 1: Enter username / create account -->
+      <div class="view" id="accountView">
+        <h1>Create Account</h1>
+        <p>Enter a username to generate your token and start using Corelyn.</p>
+        <input type="text" id="usernameInput" placeholder="Your username" />
+        <button class="get-btn" id="createAccountBtn">Create Account</button>
+      </div>
+
+      <!-- Step 2: Idle / get key -->
+      <div class="view" id="idleView">
+        <h1>Get your API key</h1>
+        <p>Generate a free key to access Corelyn. You can make up to 3 keys.</p>
+        <button class="get-btn" id="getBtn">Generate my key</button>
+      </div>
+
+      <!-- Loading -->
+      <div class="view" id="loadingView">
+        <div class="spinner"></div>
+        <span>Generating your key…</span>
+      </div>
+
+      <!-- Key revealed -->
+      <div class="view" id="keyView">
+        <div class="key-box">
+          <span class="key-value" id="keyDisplay"></span>
+          <button class="copy-btn" id="copyBtn">Copy</button>
+        </div>
+        <div class="warn-box">Copy this key now — it won’t be shown again after you leave.</div>
+        <button class="continue-btn" id="continueBtn">Continue →</button>
+      </div>
+
+      <!-- Error -->
+      <div class="view" id="errorView">
+        <div>⚠️ Something went wrong</div>
+        <div id="errorText"></div>
+        <button class="retry-btn" id="retryBtn">Try again</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const views = {
+      account: document.getElementById('accountView'),
+      idle:    document.getElementById('idleView'),
+      loading: document.getElementById('loadingView'),
+      key:     document.getElementById('keyView'),
+      error:   document.getElementById('errorView'),
+    };
+
+    function show(name) {
+      Object.values(views).forEach(v => v.classList.remove('visible'));
+      if(views[name]) views[name].classList.add('visible');
+    }
+
+    const API_BASE = 'https://corelyncloud-backend.onrender.com';
+
+    function getToken() {
+      return localStorage.getItem('corelyn_user_token');
+    }
+
+    async function createAccount() {
+      const username = document.getElementById('usernameInput').value.trim();
+      if(!username) return alert('Enter a username');
+
+      show('loading');
+      try {
+        const res = await fetch(`${API_BASE}/create-account`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({username})
+        });
+        const data = await res.json();
+        if(data.error) throw new Error(data.error);
+
+        localStorage.setItem('corelyn_user_token', data.token);
+        show('idle');
+      } catch(err) {
+        document.getElementById('errorText').textContent = err.message;
+        show('error');
+      }
+    }
+
+    async function fetchKey() {
+      const token = getToken();
+      if(!token) return show('account');
+
+      show('loading');
+      try {
+        const res = await fetch(`${API_BASE}/get-key`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        if(data.error) throw new Error(data.error);
+
+        const key = data.key;
+        document.getElementById('keyDisplay').textContent = key;
+        localStorage.setItem('corelyn_api_key', key);
+        show('key');
+      } catch(err) {
+        document.getElementById('errorText').textContent = err.message || 'Could not reach /get-key.';
+        show('error');
+      }
+    }
+
+    // Initial check
+    if(getToken()) show('idle');
+    else show('account');
+
+    document.getElementById('createAccountBtn').addEventListener('click', createAccount);
+    document.getElementById('getBtn').addEventListener('click', fetchKey);
+    document.getElementById('retryBtn').addEventListener('click', () => {
+      if(getToken()) fetchKey(); else show('account');
+    });
+    document.getElementById('continueBtn').addEventListener('click', () => window.location.href="https://corelyn.github.io/cloud-backend/");
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const key = document.getElementById('keyDisplay').textContent;
+      navigator.clipboard.writeText(key).then(()=>{
+        const btn = document.getElementById('copyBtn');
+        btn.textContent='Copied!';
+        btn.classList.add('copied');
+        setTimeout(()=>{ btn.textContent='Copy'; btn.classList.remove('copied'); },2000);
+      });
+    });
+  </script>
+</body>
+</html>
