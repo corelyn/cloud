@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Corelyn — Get your key</title>
+  <title>Corelyn Cloud</title>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -63,9 +63,10 @@
     .view { display: none; flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
     .view.visible { display: flex; }
 
-    .get-btn, .continue-btn, .retry-btn { width: 100%; padding: .9rem; border: none; border-radius: 11px; font-family: 'Sora', sans-serif; font-weight: 600; cursor: pointer; }
+    .get-btn, .continue-btn, .retry-btn, .go-to-guide { width: 100%; padding: .9rem; border: none; border-radius: 11px; font-family: 'Sora', sans-serif; font-weight: 600; cursor: pointer; }
     .get-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
     .continue-btn { background: linear-gradient(135deg, var(--accent), #8b6fff); color: #fff; }
+    .go-to-guide { background: linear-gradient(135deg, var(--accent), #8b6fff); color: #fff; }
     .retry-btn { background: transparent; border: 1px solid var(--border-hi); color: var(--text); }
 
     .spinner { width: 40px; height: 40px; border: 2px solid rgba(124,106,255,.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .75s linear infinite; }
@@ -107,6 +108,8 @@
         <h1>Get your API key</h1>
         <p>Generate a free key to access Corelyn. You can make up to 3 keys.</p>
         <button class="get-btn" id="getBtn">Generate my key</button>
+        <br>
+        <button class="go-to-guide" id="gotoguide">Go to guide</button>
       </div>
 
       <!-- Loading -->
@@ -123,6 +126,8 @@
         </div>
         <div class="warn-box">Copy this key now — it won’t be shown again after you leave.</div>
         <button class="continue-btn" id="continueBtn">Continue →</button>
+        <br>
+        <button class="go-to-guide" id="gotoguide">Go to guide</button>
       </div>
 
       <!-- Error -->
@@ -224,3 +229,4 @@
   </script>
 </body>
 </html>
+
