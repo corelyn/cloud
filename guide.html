@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Corelyn — Cloud Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #08080e;
+      --surface:  #0f0f18;
+      --border:   #1a1a2e;
+      --border-hi:#2a2a44;
+      --accent:   #7c6aff;
+      --accent2:  #a78bfa;
+      --text:     #e8e8f0;
+      --muted:    #5a5a78;
+      --success:  #6bffb8;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Sora', sans-serif; }
+
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 55% 45% at 15% 10%, rgba(124,106,255,.14) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 55% at 85% 90%, rgba(167,139,250,.09) 0%, transparent 65%);
+    }
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      width: 100%; max-width: 830px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.4rem;
+      box-shadow: 0 0 0 1px rgba(124,106,255,.07), 0 40px 100px rgba(0,0,0,.7), 0 0 80px rgba(124,106,255,.05);
+      animation: cardIn .45s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity:0; transform: translateY(20px) scale(.98); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    .logo-row { display: flex; align-items: center; gap: .7rem; margin-bottom: 2rem; }
+    .logo-mark { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 9px; display: grid; place-items: center; font-size: .95rem; box-shadow: 0 0 18px rgba(124,106,255,.35); }
+    .logo-name { font-size: 1.1rem; font-weight: 600; letter-spacing: -.02em; }
+
+    /* Step views */
+    .view { display: none; flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
+    .view.visible { display: flex; }
+
+    .get-btn, .continue-btn, .retry-btn { width: 100%; padding: .9rem; border: none; border-radius: 11px; font-family: 'Sora', sans-serif; font-weight: 600; cursor: pointer; }
+    .get-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+    .continue-btn { background: linear-gradient(135deg, var(--accent), #8b6fff); color: #fff; }
+    .retry-btn { background: transparent; border: 1px solid var(--border-hi); color: var(--text); }
+
+    .spinner { width: 40px; height: 40px; border: 2px solid rgba(124,106,255,.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .key-box { background: rgba(255,255,255,.04); border: 1px solid var(--border-hi); border-radius: 10px; padding: .85rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+    .key-value { font-family: 'JetBrains Mono', monospace; color: var(--success); word-break: break-all; flex: 1; user-select: all; }
+    .copy-btn { flex-shrink: 0; background: rgba(124,106,255,.15); border: 1px solid rgba(124,106,255,.25); border-radius: 7px; color: var(--accent2); font-size: .75rem; font-weight: 500; padding: .35rem .7rem; cursor: pointer; }
+
+    input { width: 100%; padding: .7rem 1rem; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: .9rem; }
+
+    .warn-box { display: flex; gap: .65rem; align-items: flex-start; background: rgba(255,200,80,.06); border: 1px solid rgba(255,200,80,.18); border-radius: 9px; padding: .75rem .9rem; font-size: .78rem; color: #c8a84e; line-height: 1.5; }
+
+      code {
+      font-family: Consolas,"Courier New",monospace;
+      color: #ffffff;
+      background-color: #000000cc;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 10px;
+      display: block;
+      text-align: left;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .code-container {
+      padding: 2px;
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: var(--accent) 0.3s;
+    }
+
+    .copy-btn:hover {
+      background-color: var(--accent);
+    }
+
+    a {
+      color: blue;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="bg-grid"></div>
+
+  <div class="page">
+    <div class="card">
+
+      <div class="logo-row">
+        <div class="logo-mark">
+          <img src="./resc/logo.png" width="30px" height="30px">
+        </div>
+        <span class="logo-name">Corelyn Cloud Guide</span>
+      </div>
+      <div>
+        <h1>Wellcome!</h1>
+        <h2>Step 1 :</h2>
+        <h4>  Go to : <a onclick="window.location.href='https://corelyn.github.io/cloud/'" >https://corelyn.github.io/cloud/</a></h4>
+        <h2>Step 2: </h2>
+        <h4>Create a account with your username (so we can identify you)</h4>
+        <h2>Step 3 : </h2>
+        <h4>Generate a API key (DO NOT SHARE IT AND DO NOT HARDCODE IT)</h4>
+        <h2>Step 4: </h2>
+        <h4>Use in code :</h4>
+        <div class="code-container">
+        <button class="copy-btn" onclick="copyCommand()">Copy</button>
+        <code id="code">
+// Minimal JS fetch example
+async function getAIResponse(prompt) {
+  try {
+    const res = await fetch("https://corelyncloud-backend.onrender.com/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        apiKey: "YOUR_API_KEY",
+        model: "nvidia/moonshotai/kimi-k2.5",      // When you replace models replace this
+        prompt: prompt
+      })
+    });
+
+    const data = await res.json();
+
+    // Log AI response
+    console.log("AI Response:", data);
+
+    // Return just the text if available
+    return data.choices?.[0]?.message?.content || data.text || data;
+    
+  } catch (err) {
+    console.error("Error fetching AI response:", err);
+    return null;
+  }
+}
+
+// Example usage
+getAIResponse("Write a short haiku about AI").then(response => {
+  console.log("Final Response:", response);
+});
+
+        </code>
+      </div>
+      <h2>Step 5: </h2>
+      <h4>Customize models :</h4>
+      <h4>- NVIDIA</h4>
+        <ul>
+          <li>KimiK2 : nvidia/moonshotai/kimi-k2.5</li>
+          <li>Qwen3.5 : nvidia/qwen/qwen3.5-397b-a17b</li>
+          <li>phi3.5-mini-instruct : nvidia/microsoft/phi-3.5-mini-instruct</li>
+          <li>llama-3.2-1b-instruct : nvidia/meta/llama-3.2-1b-instruct</li>
+          <li>deepseek 3.1 : nvidia/deepseek-ai/deepseek-v3.1</li>
+        </ul>
+
+        <h4>- Cerebras</h4>
+        <ul>
+          <li>Cerebras: llama3.1-8b</li>
+          <li>Cerebras: gpt-oss-120b</li>
+        </ul>
+    </div>
+  </div>
+
+  <script>
+    function copyCommand() {
+      const command = document.getElementById('code').innerText.trim();
+      navigator.clipboard.writeText(command).then(() => {
+        alert('Command copied to clipboard!');
+      }).catch(err => {
+        alert('Failed to copy: ' + err);
+      });
+    }
+  </script>
+</body>
+</html>
