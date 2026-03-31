@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corelyn Devs</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<!-- Marked.js for Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- Prism.js for syntax highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+<style>
+  :root {
+    --bg: #08080e;
+    --surface: #0f0f18;
+    --border: #1a1a2e;
+    --border-hi: #2a2a44;
+    --accent: #7c6aff;
+    --accent2: #a78bfa;
+    --text: #e8e8f0;
+    --muted: #5a5a78;
+    --success: #6bffb8;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 250px;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+  
+    /* Make sidebar stretch to bottom */
+    min-height: 100vh;      /* full viewport height */
+    position: sticky;       /* stick to top while scrolling */
+    top: 0;                 /* start at top */
+  }
+
+  .sidebar-header { padding: 1rem; display: flex; justify-content: center; }
+  .sidebar-header img { width: 60px; height: 60px; }
+  .sidebar h2 { margin: 1rem; font-size: 1.2rem; }
+  .nav-item {
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    border-left: 4px solid transparent;
+  }
+  .nav-item:hover { background: #1a1a2e; border-color: var(--accent); }
+  .nav-item.active { background: rgba(124,106,255,0.2); border-color: var(--accent); }
+
+  /* Content area */
+  .content {
+    flex: 1;
+    overflow: auto;
+    padding: 2rem;
+    max-width: 900px;
+    margin: auto;
+
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+  }
+  .content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  .content pre { background:#1e1e1e; border:1px solid #3e3e42; border-radius:8px; padding:1rem; overflow-x:auto; }
+  .content h1 { font-size:2rem; margin-top:2rem; margin-bottom:1rem; }
+  .content h2 { font-size:1.5rem; margin-top:1.5rem; margin-bottom:0.8rem; }
+  .content h3 { font-size:1.2rem; margin-top:1rem; margin-bottom:0.5rem; }
+  .content p { margin-bottom:1rem; line-height:1.6; }
+  .content ul, .content ol { margin-left:2rem; margin-bottom:1rem; }
+
+  /* Optional background mesh/grid */
+  .bg-mesh, .bg-grid { position: fixed; inset:0; z-index:0; pointer-events:none; }
+  .bg-mesh {
+    background:
+      radial-gradient(ellipse 55% 45% at 15% 10%, rgba(124,106,255,.14) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 55% at 85% 90%, rgba(167,139,250,.09) 0%, transparent 65%);
+  }
+  .bg-grid {
+    background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /* Optional: copy button for code blocks */
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .code-container { position: relative; display: block; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <img src="./resc/logo.png" alt="Corelyn Logo">
+  </div>
+  <h2>Corelyn Devs</h2>
+  <div class="nav-item active" data-file="resc/docs/home.md">🏠 Home</div>
+  <div class="nav-item" data-file="resc/docs/api.md">🔑 Corelyn API Key</div>
+  <div class="nav-item" data-file="resc/docs/vanilajs.md">🟨📜 Usage for vanilla JS</div>
+  <div class="nav-item" data-file="resc/docs/pythonsdk.md">🐍 Usage for Python</div>
+  <div class="nav-item" data-file="resc/docs/nodejs.md">🐊 Usage for NodeJS</div>
+  <div class="nav-item" data-file="resc/docs/moremodels.md">🤖 More Models</div>
+</div>
+
+<div class="content" id="content">Loading...</div>
+
+<div class="bg-mesh"></div>
+<div class="bg-grid"></div>
+
+<script>
+const contentDiv = document.getElementById('content');
+const navItems = document.querySelectorAll('.nav-item');
+const sidebar = document.querySelector('.sidebar');
+
+function loadMarkdown(file) {
+  fetch(file)
+    .then(res => res.text())
+    .then(md => {
+      contentDiv.innerHTML = marked.parse(md);
+      Prism.highlightAll();
+
+      // Set sidebar min-height to match content height
+      const contentHeight = contentDiv.scrollHeight;
+      sidebar.style.minHeight = contentHeight + 'px';
+    })
+    .catch(err => {
+      contentDiv.innerHTML = `<h1>Error loading page</h1><p>${err}</p>`;
+    });
+}
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    navItems.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    const file = item.getAttribute('data-file');
+    loadMarkdown(file);
+  });
+});
+
+// Load default page
+loadMarkdown('resc/docs/home.md');
+</script>
+
+</body>
+</html>
