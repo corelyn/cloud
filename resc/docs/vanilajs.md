@@ -4,7 +4,7 @@
 // Minimal JS fetch example with system + user messages
 async function getAIResponse(userPrompt) {
   try {
-    const res = await fetch("https://corelyncloud-backend.onrender.com/chat/completions", {
+    const res = await fetch("https://api.corelyn.ro/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
